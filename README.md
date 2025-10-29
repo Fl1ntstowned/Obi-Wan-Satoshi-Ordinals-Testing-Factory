@@ -212,6 +212,37 @@ Ordinals--Testing-facility-Obi-Wan-Satoshi/
 
 ---
 
+## 🧪 Testing Environment
+
+### Testing the Cinema Player
+
+You have **two options** for testing:
+
+#### Option 1: Use Our Live Test Inscription (Recommended)
+Visit the live inscription with the extension installed:
+```
+https://ordinals.com/inscription/ae65be2498d3541f9c4c97565a474286c05cf816780e3591f13d02861d525d1bi0
+```
+
+#### Option 2: Test Locally with Your Own HTML
+1. Copy the HTML from `inscription/cinema-player.html`
+2. Paste it into any Ordinals inscription viewer
+3. Test with the extension installed
+
+### Live Server Access
+
+**We provide a live backend server for testing!**
+
+✅ **Available**: Our production server is accessible for community testing
+⚠️ **Please be respectful**: Keep uploaded files **small** (under 10MB recommended)
+🚫 **Abuse Policy**: Heavy usage or large file spam will result in server access being revoked and password-protected
+
+**Why?** Server resources are limited and we want everyone to have a good testing experience.
+
+**For serious testing**: Set up your own local backend (see Developer Setup below)
+
+---
+
 ### For Developers
 
 **Backend Setup:**
