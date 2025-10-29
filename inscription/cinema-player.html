@@ -431,14 +431,9 @@
   </div>
 
   <script>
-    // ===== CONFIGURATION =====
     const INSCRIPTION_ID = 'cinema-player';
+    const TEST_DIRECT_URL_MODE = false;
 
-    // TEST MODE: Try direct URLs instead of base64 (experimental)
-    // Set to true to test, false to use proven base64 method
-    const TEST_DIRECT_URL_MODE = false; // Change to true to test
-
-    // ===== DOM ELEMENTS =====
     const videoPlayer = document.getElementById('videoPlayer');
     const imagePlayer = document.getElementById('imagePlayer');
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -451,43 +446,36 @@
     const fullscreenBtn = document.getElementById('fullscreenBtn');
     const stage = document.getElementById('stage');
 
-    // ===== STATE =====
     let playlist = [];
     let currentIndex = 0;
 
-    // ===== CHAT STATE =====
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const chatSendBtn = document.getElementById('chatSendBtn');
     const chatUserCount = document.getElementById('chatUserCount');
 
-    // ===== MESSAGING =====
     function callContract(method, params = {}) {
       const message = {
         type: "ORDINALS_CONTRACT_CALL",
         payload: { inscriptionId: INSCRIPTION_ID, method, params }
       };
 
-      // Build list of unique target windows (avoid sending duplicates)
       const targets = new Set();
       targets.add(window);
 
-      // Only add parent if it's different from current window
       if (window.parent && window.parent !== window) {
         targets.add(window.parent);
       }
 
-      // Only add top if it's different from current and parent
       if (window.top && window.top !== window && window.top !== window.parent) {
         targets.add(window.top);
       }
 
-      // Send to each unique target once
       targets.forEach(target => {
         try {
           target.postMessage(message, "*");
         } catch (e) {
-          // Silently ignore cross-origin errors
+          // Ignore cross-origin errors
         }
       });
 
@@ -496,19 +484,16 @@
 
     console.log('[Cinema] Setting up message listeners...');
 
-    // Handle messages via custom document event (from bridge)
     document.addEventListener('ORDINALS_MESSAGE', (event) => {
       console.log('[Cinema] CUSTOM EVENT received!', event.detail);
       handleResponse(event.detail);
     });
 
-    // Handle messages via window.postMessage (fallback)
     window.addEventListener("message", (event) => {
       console.log('[Cinema] WINDOW MESSAGE received! Data:', event.data, 'Origin:', event.origin);
       handleResponse(event.data);
     });
 
-    // Test that event listeners are actually working
     console.log('[Cinema] Testing if event listeners are functional...');
     setTimeout(() => {
       console.log('[Cinema] Dispatching test event...');
@@ -533,13 +518,13 @@
 
       console.log('[Cinema] Message type:', data.type, 'inscriptionId:', data.inscriptionId);
 
-      // Handle test messages
+      
       if (data.type === 'TEST') {
         console.log('[Cinema] ✅ TEST MESSAGE RECEIVED! Event listener is working!');
         return;
       }
 
-      // Handle chat events (sent directly from extension)
+      
       if (data.type === 'CHAT_MESSAGE') {
         console.log('[Cinema Chat] Received chat message:', data);
         displayChatMessage(data);
@@ -591,14 +576,12 @@
       if (result && result.media) {
         handlePlaylist(result.media);
       } else if (result && result.data) {
-        // Pass directUrl if provided by extension (for test mode)
         loadMedia(result.data, result.metadata, result.isBase64, result.directUrl);
       }
     }
 
     console.log('[Cinema] Message listeners set up!');
 
-    // ===== PLAYLIST HANDLING =====
     function handlePlaylist(mediaList) {
       console.log('[Cinema] Received playlist:', mediaList);
 
@@ -629,28 +612,24 @@
       mediaTitle.textContent = media.metadata.name;
       mediaDetails.textContent = `${currentIndex + 1} / ${playlist.length} • ${formatBytes(media.metadata.size)} • ${media.metadata.type}`;
 
-      // Calculate file size in MB for timeout and messaging
       const sizeInMB = media.metadata.size / (1024 * 1024);
 
-      // Show loading message for large files
       const loadingContent = document.querySelector('.loading-content div:last-child');
-      if (media.metadata.size > 50 * 1024 * 1024) { // > 50MB
+      if (media.metadata.size > 50 * 1024 * 1024) {
         const estimatedTime = Math.max(60, Math.ceil(sizeInMB));
         loadingContent.textContent = `Loading large file (${formatBytes(media.metadata.size)})... This may take up to ${estimatedTime} seconds. Please wait...`;
       } else {
         loadingContent.textContent = 'Loading media from extension...';
       }
-
-      // Set timeout based on file size (minimum 60 seconds, +1 second per MB for production backend)
       const timeoutDuration = Math.max(60000, Math.ceil(sizeInMB) * 1000);
       console.log(`[Cinema] Setting timeout for ${timeoutDuration}ms (${Math.round(timeoutDuration/1000)}s) for ${Math.round(sizeInMB)}MB file`);
 
-      // Clear any existing timeout
+      
       if (window.mediaLoadTimeout) {
         clearTimeout(window.mediaLoadTimeout);
       }
 
-      // Set new timeout for this media
+      
       window.mediaLoadTimeout = setTimeout(() => {
         if (!loadingOverlay.classList.contains('hidden')) {
           showError(`Timeout loading "${media.metadata.name}". Large files (${formatBytes(media.metadata.size)}) may take longer. Try refreshing the page.`);
@@ -660,32 +639,32 @@
       callContract("getMedia", { mediaId: media.id });
     }
 
-    // ===== MEDIA LOADING =====
+    
     function loadMedia(data, metadata, isBase64, directUrl = null) {
       try {
         console.log('[Cinema] Loading media:', metadata.name);
 
-        // Clear the loading timeout since we received data
+        
         if (window.mediaLoadTimeout) {
           clearTimeout(window.mediaLoadTimeout);
           window.mediaLoadTimeout = null;
         }
 
-        // Hide both players
+        
         videoPlayer.classList.add('hidden');
         imagePlayer.classList.add('hidden');
 
         let url;
 
-        // TEST MODE: Try direct URL if provided
+        
         if (TEST_DIRECT_URL_MODE && directUrl) {
           console.log('[Cinema] 🧪 TEST MODE: Using direct URL:', directUrl);
           url = directUrl;
         } else {
-          // PROVEN METHOD: Use base64 conversion
+          
           console.log('[Cinema] Using proven base64 method');
 
-          // Convert data to ArrayBuffer
+          
           let arrayBuffer;
           if (isBase64 && typeof data === 'string') {
             console.log('[Cinema] Decoding base64, length:', data.length);
@@ -712,12 +691,12 @@
           url = URL.createObjectURL(blob);
         }
 
-        // Display based on type
+        
         if (metadata.type.startsWith('video/')) {
           videoPlayer.src = url;
           videoPlayer.classList.remove('hidden');
 
-          // Handle video errors
+          
           videoPlayer.addEventListener('error', (e) => {
             console.error('[Cinema] Video error:', e);
             const error = videoPlayer.error;
@@ -763,8 +742,8 @@
             console.log('[Cinema] Image loaded, navigation ready');
           }, { once: true });
 
-          // For images, auto-advance after 5 seconds (like a slideshow)
-          // User can still manually navigate
+          
+          
           setTimeout(() => {
             if (imagePlayer.src === url && currentIndex < playlist.length - 1) {
               console.log('[Cinema] Image slideshow - auto advancing...');
@@ -781,7 +760,7 @@
       }
     }
 
-    // ===== CONTROLS =====
+    
     prevBtn.addEventListener('click', playPrevious);
     nextBtn.addEventListener('click', playNext);
 
@@ -813,21 +792,21 @@
       }
     });
 
-    // Keyboard controls
+    
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') playPrevious();
       if (e.key === 'ArrowRight') playNext();
       if (e.key === 'f' || e.key === 'F') fullscreenBtn.click();
     });
 
-    // ===== HELPERS =====
+    
     function showError(message) {
-      // If this is an "already loading" message, don't show the red error box
-      // Just update the loading overlay instead
+      
+      
       if (message.includes('already loading') || message.includes('another player')) {
         mediaTitle.textContent = 'Waiting...';
         mediaDetails.textContent = 'Another player is loading this video';
-        // Keep loading overlay visible but update message
+        
         const loadingText = document.querySelector('.loading-content div:last-child');
         if (loadingText) {
           loadingText.textContent = 'Another player is loading... Please wait';
@@ -835,7 +814,7 @@
         return;
       }
 
-      // For real errors, show the red error box
+      
       loadingOverlay.classList.add('hidden');
       errorMessage.textContent = message;
       errorMessage.classList.remove('hidden');
@@ -851,7 +830,7 @@
       return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
     }
 
-    // ===== CHAT FUNCTIONS =====
+    
     function sendChatMessage() {
       const message = chatInput.value.trim();
       if (!message) return;
@@ -862,7 +841,7 @@
     }
 
     function displayChatMessage(msg) {
-      // Remove empty state if present
+      
       const emptyState = chatMessages.querySelector('.chat-empty');
       if (emptyState) {
         chatMessages.innerHTML = '';
@@ -914,7 +893,7 @@
       return div.innerHTML;
     }
 
-    // Chat event listeners
+    
     chatSendBtn.addEventListener('click', sendChatMessage);
     chatInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -923,20 +902,18 @@
       }
     });
 
-    // Request to join chat on load
+    
     setTimeout(() => {
       console.log('[Cinema Chat] Joining chat room...');
       callContract('joinChatRoom', { roomId: 'global:cinema' });
     }, 1000);
 
-    // ===== INITIALIZATION =====
+
     console.log('[Cinema] Initializing cinema player...');
 
-    // Global lock to ensure only ONE instance loads (works across all iframes in same origin)
     const LOCK_KEY = '__cinema_player_loading__';
 
     function tryAcquireGlobalLock() {
-      // Try to set a flag on the top window (if accessible) or current window
       try {
         const targetWindow = window.top || window;
         if (targetWindow[LOCK_KEY]) {
@@ -946,7 +923,6 @@
         targetWindow[LOCK_KEY] = Date.now();
         console.log('[Cinema] Global lock acquired');
 
-        // Auto-release after 30 seconds in case of crash
         setTimeout(() => {
           if (targetWindow[LOCK_KEY]) {
             delete targetWindow[LOCK_KEY];
@@ -956,7 +932,6 @@
 
         return true;
       } catch (e) {
-        // If we can't access top window (cross-origin), use current window
         if (window[LOCK_KEY]) {
           console.log('[Cinema] Another instance already loading locally');
           return false;
@@ -967,36 +942,27 @@
       }
     }
 
-    // Check if we should actually load media
-    // Now loads on all screen sizes - window instance issues have been resolved
-
-    // Check global lock first to prevent multiple instances loading simultaneously
     if (!tryAcquireGlobalLock()) {
-      // Another instance is already loading
       mediaTitle.textContent = 'Loading...';
       mediaDetails.textContent = 'Another player instance is loading this video. Please wait.';
       loadingOverlay.classList.add('hidden');
       playlistCount.textContent = 'Waiting';
 
-      // Check again in 5 seconds
       setTimeout(() => {
         if (tryAcquireGlobalLock()) {
           location.reload();
         }
       }, 5000);
     } else {
-      // Proceed with loading on any screen size
       console.log('[Cinema] Player initialized, loading media...');
       console.log(`[Cinema] Window size: ${window.innerWidth}x${window.innerHeight}`);
 
-      // Initial connection timeout (for listMedia)
       let initialTimeout = setTimeout(() => {
         if (!loadingOverlay.classList.contains('hidden') && playlist.length === 0) {
           showError('Timeout: Could not connect to extension. Make sure it is installed and media is uploaded.');
         }
       }, 10000);
 
-      // Start requesting media list
       setTimeout(() => {
         callContract("listMedia");
       }, 500);
