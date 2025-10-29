@@ -214,32 +214,31 @@ Ordinals--Testing-facility-Obi-Wan-Satoshi/
 
 ## 🧪 Testing Environment
 
-### Testing the Cinema Player
+### How to Test
 
-You have **two options** for testing:
+**To test the Cinema Player, you MUST:**
 
-#### Option 1: Use Our Live Test Inscription (Recommended)
-Visit the live inscription with the extension installed:
-```
-https://ordinals.com/inscription/ae65be2498d3541f9c4c97565a474286c05cf816780e3591f13d02861d525d1bi0
-```
+1. **Install the extension** (see Installation steps above)
+2. **Copy the HTML** from `inscription/cinema-player.html` in this repo
+3. **Visit the test inscription viewer:**
+   ```
+   https://ordinals.com/inscription/ae65be2498d3541f9c4c97565a474286c05cf816780e3591f13d02861d525d1bi0
+   ```
+4. **Paste the HTML** into the inscription viewer
+5. **Upload test media** via the extension icon (keep files small!)
+6. **Watch it work!**
 
-#### Option 2: Test Locally with Your Own HTML
-1. Copy the HTML from `inscription/cinema-player.html`
-2. Paste it into any Ordinals inscription viewer
-3. Test with the extension installed
+### Live Server Usage Policy
 
-### Live Server Access
+**We provide a live backend server for community testing.**
 
-**We provide a live backend server for testing!**
+✅ **Available now** - Our production server is accessible for all testers
+⚠️ **Keep files SMALL** - Upload files under 10MB to respect server resources
+🚫 **Abuse = Revoked Access** - Heavy usage or large file spam will result in the server being password-protected
 
-✅ **Available**: Our production server is accessible for community testing
-⚠️ **Please be respectful**: Keep uploaded files **small** (under 10MB recommended)
-🚫 **Abuse Policy**: Heavy usage or large file spam will result in server access being revoked and password-protected
+**Why?** We want everyone to test, but server resources cost money. Be respectful and we can keep it open for the community.
 
-**Why?** Server resources are limited and we want everyone to have a good testing experience.
-
-**For serious testing**: Set up your own local backend (see Developer Setup below)
+**For developers building their own projects:** Set up your own local backend (see Developer Setup below)
 
 ---
 
