@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Ordinals Cinema Player",
+  "version": "1.0.0",
+  "description": "Shared media player for Bitcoin Ordinals - Upload once, everyone can watch!",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Cinema Player - Upload Media"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["injected-bridge.js", "socket.io.min.js", "chat-bridge.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
